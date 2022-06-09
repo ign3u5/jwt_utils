@@ -6,3 +6,4 @@
 - jsonwebtoken  
 - browserify  
 `npm install browserify -g`
+`browserify popup.js -o bundle.js`
