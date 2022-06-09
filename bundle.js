@@ -33376,9 +33376,15 @@ getAccessToken.addEventListener("click", async () => {
 setAccessToken.addEventListener("click", async () => {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-  let previousDataPayload = dataPayload.value;
-  chrome.storage.sync.set({previousDataPayload});
-  let plaintest = Buffer.from(storedSecret, 'base64');
+  let environment = getEnvironment(tab.url);
+  log("Environment:", environment);
+
+  var secret = await getSecretFromConsul(environment);
+  log("Retrieved secret", secret);
+
+  cachePayload(dataPayload.value);
+
+  let plaintest = Buffer.from(secret, 'base64');
   var token = jwt.sign(JSON.parse(dataPayload.value), plaintest);
   chrome.scripting.executeScript({
     args: [token],
@@ -33388,12 +33394,28 @@ setAccessToken.addEventListener("click", async () => {
   log("Updating token to ", token);
 })
 
+function getEnvironment(url) {
+  if (url.indexOf("hencpdev") != -1) return "dev";
+  if (url.indexOf("htestdat") != -1) return "dat";
+  if (url.indexOf("hencpat1") != -1) return "at1";
+  return "unknown";
+}
+
+async function getSecretFromConsul(env) {
+  return await fetch(`https://hconengapp01/v1/kv/encpublishing/${env}/encprocess/global/security`)
+  .then(response => response.json())
+  .then(([data]) => JSON.parse(atob(data.Value)).JwtCurrentSecret);
+}
+
+function cachePayload(previousDataPayload) {
+  chrome.storage.sync.set({previousDataPayload});
+}
+
 function getAccessTokenFromPage() {
   return localStorage.getItem("access_token");
 }
 
 function setAccessTokenInPage(accessToken) {
-  console.log(accessToken);
   localStorage.setItem("access_token", accessToken);
 }
 
