@@ -33362,7 +33362,7 @@ getAccessToken.addEventListener("click", async () => {
     target: { tabId: tab.id },
     function: getAccessTokenFromPage
   },async ([accessToken]) => {
-    log("Access token:", accessToken.result);
+    log("Current token:", accessToken.result);
     let currentJwtClaims = await getClaimsFromToken(tab.url, accessToken.result);
     cachePayload(currentJwtClaims);
     dataPayload.value = JSON.stringify(currentJwtClaims, null, 2);
@@ -33380,10 +33380,7 @@ setAccessToken.addEventListener("click", async () => {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   let environment = getEnvironment(tab.url);
-  log("Environment:", environment);
-
   var secret = await getSecretFromConsul(environment);
-  log("Retrieved secret", secret);
 
   cachePayload(dataPayload.value);
 
@@ -33394,7 +33391,7 @@ setAccessToken.addEventListener("click", async () => {
     target: { tabId: tab.id },
     function: setAccessTokenInPage
   });
-  log("Updating token to ", token);
+  log("Updating token to:", token);
 })
 
 function getEnvironment(url) {
