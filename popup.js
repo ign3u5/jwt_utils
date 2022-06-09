@@ -2,11 +2,7 @@ let jwt = require("jsonwebtoken");
 let getAccessToken = document.getElementById("getAccessToken");
 let setAccessToken = document.getElementById("updateAccessToken");
 let dataPayload = document.getElementById("dataPayload");
-let storedSecret;
 
-chrome.storage.sync.get("secret", ({ secret }) => {
-  storedSecret = secret;
-})
 chrome.storage.sync.get("previousDataPayload", ({ previousDataPayload }) => {
   if (typeof(previousDataPayload) == "object")
     dataPayload.value = JSON.stringify(previousDataPayload, null, 2);
@@ -21,12 +17,18 @@ getAccessToken.addEventListener("click", async () => {
     target: { tabId: tab.id },
     function: getAccessTokenFromPage
   },([accessToken]) => {
-    let plaintext = Buffer.from(storedSecret, 'base64');
-    let previousDataPayload = jwt.verify(accessToken.result, plaintext);
-    dataPayload.value = JSON.stringify(previousDataPayload, null, 2);
-    chrome.storage.sync.set({previousDataPayload});
+    let currentJwtClaims = getClaimsFromToken(tab.url, accessToken.result);
+    cachePayload(currentJwtClaims);
+    dataPayload.value = JSON.stringify(currentJwtClaims, null, 2);
   });
 });
+
+function getClaimsFromToken(url, token) {
+  let environment = getEnvironment(url);
+  var secret = getSecretFromConsul(environment);
+  let plaintext = Buffer.from(secret, 'base64');
+  return jwt.verify(token, plaintext);
+}
 
 setAccessToken.addEventListener("click", async () => {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
