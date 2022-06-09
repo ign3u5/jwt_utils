@@ -5,5 +5,5 @@
 ### Dependencies
 - jsonwebtoken  
 - browserify  
-`npm install browserify -g`
-`browserify popup.js -o bundle.js`
+  `npm install browserify -g`  
+  `browserify popup.js -o bundle.js`
