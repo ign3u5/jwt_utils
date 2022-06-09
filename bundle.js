@@ -33361,16 +33361,19 @@ getAccessToken.addEventListener("click", async () => {
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
     function: getAccessTokenFromPage
-  },([accessToken]) => {
-    let currentJwtClaims = getClaimsFromToken(tab.url, accessToken.result);
+  },async ([accessToken]) => {
+    log("Access token:", accessToken.result);
+    let currentJwtClaims = await getClaimsFromToken(tab.url, accessToken.result);
     cachePayload(currentJwtClaims);
     dataPayload.value = JSON.stringify(currentJwtClaims, null, 2);
   });
 });
 
-function getClaimsFromToken(url, token) {
+async function getClaimsFromToken(url, token) {
   let environment = getEnvironment(url);
-  var secret = getSecretFromConsul(environment);
+  log("Environment:", environment);
+  var secret = await getSecretFromConsul(environment);
+  log("Secret:", secret);
   let plaintext = Buffer.from(secret, 'base64');
   return jwt.verify(token, plaintext);
 }
@@ -33407,7 +33410,10 @@ function getEnvironment(url) {
 async function getSecretFromConsul(env) {
   return await fetch(`https://hconengapp01/v1/kv/${env}/encprocess/global/security`)
   .then(response => response.json())
-  .then(([data]) => JSON.parse(atob(data.Value)).JwtCurrentSecret);
+  .then(([data]) => {
+    log("Data:", JSON.parse(atob(data.Value)).JwtCurrentSecret);
+    return JSON.parse(atob(data.Value)).JwtCurrentSecret
+  });
 }
 
 function cachePayload(previousDataPayload) {
@@ -33415,7 +33421,9 @@ function cachePayload(previousDataPayload) {
 }
 
 function getAccessTokenFromPage() {
-  return localStorage.getItem("access_token");
+  let token = localStorage.getItem("access_token");
+  console.log(token);
+  return token;
 }
 
 function setAccessTokenInPage(accessToken) {
