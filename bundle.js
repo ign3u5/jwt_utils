@@ -33395,14 +33395,15 @@ setAccessToken.addEventListener("click", async () => {
 })
 
 function getEnvironment(url) {
-  if (url.indexOf("hencpdev") != -1) return "dev";
-  if (url.indexOf("htestdat") != -1) return "dat";
-  if (url.indexOf("hencpat1") != -1) return "at1";
+  if (url.indexOf("hencpdev") != -1) return "encpublishing/dev";
+  if (url.indexOf("htestdat") != -1) return "encpublishing/dat";
+  if (url.indexOf("hencpat1") != -1) return "encpublishing/at1";
+  if (url.indexOf("localhost") != -1) return "localdev";
   return "unknown";
 }
 
 async function getSecretFromConsul(env) {
-  return await fetch(`https://hconengapp01/v1/kv/encpublishing/${env}/encprocess/global/security`)
+  return await fetch(`https://hconengapp01/v1/kv/${env}/encprocess/global/security`)
   .then(response => response.json())
   .then(([data]) => JSON.parse(atob(data.Value)).JwtCurrentSecret);
 }
