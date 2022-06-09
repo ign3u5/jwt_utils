@@ -19,6 +19,7 @@ textarea {
   padding-top: 5px;
   width: 300px;
   height: 200px;
+  z-index: 10;
 }
 
 *,
@@ -148,5 +149,8 @@ body {
   }
 }
 svg {
-  display: hidden;
+  position: absolute;
+  visibility: hidden;
+  width: 1px;
+  height: 1px;
 }

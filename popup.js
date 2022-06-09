@@ -4,6 +4,7 @@ let setAccessToken = document.getElementById("updateAccessToken");
 let dataPayload = document.getElementById("dataPayload");
 
 chrome.storage.sync.get("previousDataPayload", ({ previousDataPayload }) => {
+  if (!previousDataPayload) return;
   if (typeof(previousDataPayload) == "object")
     dataPayload.value = JSON.stringify(previousDataPayload, null, 2);
   else
